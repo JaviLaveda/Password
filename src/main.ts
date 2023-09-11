@@ -1,23 +1,6 @@
 import "./style.css";
 
-//initial values
-
-let userScore: number = 0;
-
-const maxScore: number = 7.5;
-
-enum Cards {
-  as = 1,
-  dos = 2,
-  tres = 3,
-  cuatro = 4,
-  cinco = 5,
-  seis = 6,
-  siete = 7,
-  sota = 10,
-  caballo = 11,
-  rey = 12,
-}
+import { game, Cards } from "./model";
 
 // MOTOR FUNCTIONS
 
@@ -31,7 +14,7 @@ const adjustValue = (value: number) => (value <= 7 ? value : value + 2);
 const assignScore = (value: number) => (value <= 7 ? value : 0.5);
 
 //adding score to userScore
-const addingScore = (value: number) => (userScore += value);
+const addingScore = (value: number) => (game.userScore += value);
 
 // UI INTERFACE FUNCTIONS
 
@@ -57,7 +40,7 @@ const showCard = (urlCard: string) => {
 const showScore = () => {
   const scoreElement = document.getElementById("score");
   if (scoreElement && scoreElement instanceof HTMLHeadingElement) {
-    scoreElement.textContent = userScore.toString().padStart(2, "0");
+    scoreElement.textContent = game.userScore.toString().padStart(2, "0");
   } else {
     throw new Error("HeadingElement not found");
   }
@@ -79,9 +62,9 @@ const askAnotherCard = () => {
 
 // checking game status
 const checkingStatus = () => {
-  if (userScore < maxScore) {
+  if (game.userScore < game.maxScore) {
     keepPlaying();
-  } else if (userScore === maxScore) {
+  } else if (game.userScore === game.maxScore) {
     winGame();
   } else {
     gameOver();
@@ -90,11 +73,11 @@ const checkingStatus = () => {
 
 //status text
 const getStatusMessage = (score: number): string => {
-  if (score < maxScore) {
+  if (score < game.maxScore) {
     return "¡Sigue jugando!";
-  } else if (score === maxScore) {
+  } else if (score === game.maxScore) {
     return "¡Lo has clavado!¡Enhorabuena!";
-  } else if (score > maxScore) {
+  } else if (score > game.maxScore) {
     return "¡GAME OVER!";
   } else {
     return "";
@@ -112,13 +95,13 @@ const showMessage = (text: string) => {
 
 //keep playing message
 const keepPlaying = () => {
-  const message = getStatusMessage(userScore);
+  const message = getStatusMessage(game.userScore);
   showMessage(message);
 };
 
 //winning - FUNCTION
 const winGame = () => {
-  const message = getStatusMessage(userScore);
+  const message = getStatusMessage(game.userScore);
   showMessage(message);
   disableButton();
   activateNewGame();
@@ -126,7 +109,7 @@ const winGame = () => {
 
 //game over - FUNCTION
 const gameOver = () => {
-  const message = getStatusMessage(userScore);
+  const message = getStatusMessage(game.userScore);
   showMessage(message);
   disableButton();
   activateNewGame();
@@ -150,7 +133,7 @@ const getResignMessage = (score: number): string => {
 //resigning - FUNCTION
 const resign = () => {
   hiddingStatusText();
-  const message = getResignMessage(userScore);
+  const message = getResignMessage(game.userScore);
   showMessage(message);
   disableButton();
   activateNewGame();
@@ -170,7 +153,7 @@ const hiddingStatusText = () => {
 
 // NEW GAME - FUNCTION
 const newGame = () => {
-  userScore = 0;
+  game.userScore = 0;
   showScore();
   activateButton();
   hiddingStatusText();
@@ -183,11 +166,11 @@ const newGame = () => {
 
 //future - status message
 const getFutureMessageForScore = (score: number): string => {
-  if (score > maxScore) {
+  if (score > game.maxScore) {
     return "¡Has hecho bien!¡Habrías perdido!";
-  } else if (score === maxScore) {
+  } else if (score === game.maxScore) {
     return "¡Qué pena!¡Habrías ganado!";
-  } else if (score < maxScore) {
+  } else if (score < game.maxScore) {
     return "¡Qué pena!¡Estarías más cerca!";
   } else {
     return "";
@@ -203,7 +186,7 @@ const futureCard = () => {
   const cardScore = assignScore(cardNumber);
   addingScore(cardScore);
   showScore();
-  const message = getFutureMessageForScore(userScore);
+  const message = getFutureMessageForScore(game.userScore);
   showMessage(message);
   disableFutureButton();
 };
