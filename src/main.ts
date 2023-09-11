@@ -2,19 +2,7 @@ import "./style.css";
 
 import { game, Cards } from "./model";
 
-// MOTOR FUNCTIONS
-
-//generate random number
-const randomNumber = () => Math.floor(Math.random() * 10 + 1);
-
-//eliminate 8 & 9
-const adjustValue = (value: number) => (value <= 7 ? value : value + 2);
-
-//assing score to card
-const assignScore = (value: number) => (value <= 7 ? value : 0.5);
-
-//adding score to userScore
-const addingScore = (value: number) => (game.userScore += value);
+import { addingScore, adjustValue, assignScore, randomNumber } from "./motor";
 
 // UI INTERFACE FUNCTIONS
 
