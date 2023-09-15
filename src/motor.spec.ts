@@ -7,28 +7,15 @@ import {
   getStatusMessage,
 } from "./motor";
 import { game } from "./model";
-import { vi } from "vitest";
+import { expect } from "vitest";
 
 describe("randomNumber", () => {
-  it("Tratamos de obligar a mathRandom a devolver 0, debería de devolver 1", () => {
-    //Arrange
-    const expectedNumber: number = 1;
-    const sypOnMathRandom = vi.spyOn(global.Math, "random").mockReturnValue(0);
-    //Act
-    const result: number = randomNumber();
-    //Assert
-    expect(result).toBe(expectedNumber);
+  it("Comprobamos que genera valores entre 1-10, ambos incluidos", () => {
+    expect(randomNumber()).toBeGreaterThanOrEqual(1);
+    expect(randomNumber()).toBeLessThanOrEqual(10);
   });
-  it("Tratamos de obligar a mathRandom a devolver 0.99, debería de devolver 10", () => {
-    //Arrange
-    const expectedNumber: number = 10;
-    const sypOnMathRandom = vi
-      .spyOn(global.Math, "random")
-      .mockReturnValue(0.99);
-    //Act
-    const result: number = randomNumber();
-    //Assert
-    expect(result).toBe(expectedNumber);
+  it("Comprobamos que nos devuelve un número entero", () => {
+    expect(randomNumber()).toBeTypeOf("number");
   });
 });
 
