@@ -5,6 +5,8 @@ import {
   addingScore,
   getImgCard,
   getStatusMessage,
+  getResignMessage,
+  getFutureMessageForScore,
 } from "./motor";
 import { game } from "./model";
 import { expect } from "vitest";
@@ -15,7 +17,8 @@ describe("randomNumber", () => {
     expect(randomNumber()).toBeLessThanOrEqual(10);
   });
   it("Comprobamos que nos devuelve un número entero", () => {
-    expect(randomNumber()).toBeTypeOf("number");
+    const result = randomNumber();
+    expect(Number.isInteger(result)).toBe(true);
   });
 });
 
@@ -122,6 +125,66 @@ describe("getStatusMessage", () => {
     const message: string = "¡Lo has clavado!¡Enhorabuena!";
     //Act
     const statusMessage: string = getStatusMessage(value);
+    //Assert
+    expect(statusMessage).toBe(message);
+  });
+});
+
+describe("getResignMessage", () => {
+  it("Si el valor que le pasamos es menor o igual que 4 debe devolver el mensaje de conservadores", () => {
+    //Arrange
+    const value: number = 3;
+    const message: string = "¡Has sido muy conservador!";
+    //Act
+    const statusMessage: string = getResignMessage(value);
+    //Assert
+    expect(statusMessage).toBe(message);
+  });
+  it("Si el valor que le pasamos es mayor que 4 y menor o igual que cinco debería devolver el mensaje de canguelo", () => {
+    //Arrange
+    const value: number = 5;
+    const message: string = "¡Te ha entrado el canguelo eh!";
+    //Act
+    const statusMessage: string = getResignMessage(value);
+    //Assert
+    expect(statusMessage).toBe(message);
+  });
+  it("Si el valor que le pasamos es mayor que 5 y menor que 7.5 debería devolver el mensaje de casi...casi", () => {
+    //Arrange
+    const value: number = 6;
+    const message: string = "¡Uyyy!¡Casi casi!";
+    //Act
+    const statusMessage: string = getResignMessage(value);
+    //Assert
+    expect(statusMessage).toBe(message);
+  });
+});
+
+describe("getFutureMessageForScore", () => {
+  it("Si el valor que le pasamos es menor que maxScore debería de devolver mensaje de que estaríamos más cerca", () => {
+    //Arrange
+    const value: number = 7;
+    const message: string = "¡Qué pena!¡Estarías más cerca!";
+    //Act
+    const statusMessage: string = getFutureMessageForScore(value);
+    //Assert
+    expect(statusMessage).toBe(message);
+  });
+  it("Si el valor que le pasamos es mayor que maxScore debería de devolver mensaje de habríamos perdido", () => {
+    //Arrange
+    const value: number = 8;
+    const message: string = "¡Has hecho bien!¡Habrías perdido!";
+    //Act
+    const statusMessage: string = getFutureMessageForScore(value);
+    //Assert
+    expect(statusMessage).toBe(message);
+  });
+  it("Si el valor que le pasamos es igual que maxScore debería de devolver mensaje de que habríamos ganado", () => {
+    //Arrange
+    const value: number = 7.5;
+    const message: string = "¡Qué pena!¡Habrías ganado!";
+    //Act
+    const statusMessage: string = getFutureMessageForScore(value);
     //Assert
     expect(statusMessage).toBe(message);
   });
