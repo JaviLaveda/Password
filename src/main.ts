@@ -1,220 +1,154 @@
-type TipoIva =
-  | "general"
-  | "reducido"
-  | "superreducidoA"
-  | "superreducidoB"
-  | "superreducidoC"
-  | "sinIva";
-
-interface Producto {
-  nombre: string;
-  precio: number;
-  tipoIva: TipoIva;
+interface ValidacionClave {
+  esValida: boolean;
+  error?: string;
 }
 
-interface LineaTicket {
-  producto: Producto;
-  cantidad: number;
-}
-
-interface ResultadoLineaTicket {
-  nombre: string;
-  cantidad: number;
-  precioSinIva: number;
-  tipoIva: TipoIva;
-  precioConIva: number;
-}
-
-interface ResultadoTotalTicket {
-  totalSinIva: number;
-  totalConIva: number;
-  totalIva: number;
-}
-
-interface TotalPorTipoIva {
-  tipoIva: TipoIva;
-  cuantia: number;
-}
-
-interface TicketFinal {
-  lineas: ResultadoLineaTicket[];
-  total: ResultadoTotalTicket;
-  desgloseIva: TotalPorTipoIva[];
-}
-
-const redondearDosDecimales = (numero: number): number => {
-  return parseFloat(numero.toFixed(2));
-};
-
-const obtenerPorcentajeIva = (producto: Producto): number => {
-  switch (producto.tipoIva) {
-    case "general":
-      return 0.21;
-    case "reducido":
-      return 0.1;
-    case "superreducidoA":
-      return 0.05;
-    case "superreducidoB":
-      return 0.04;
-    case "superreducidoC":
-      return 0;
-    case "sinIva":
-      return 0;
-    default:
-      throw new Error("Tipo de IVA no válido");
-  }
-};
-
-const calcularIvaProducto = (producto: Producto): number => {
-  return redondearDosDecimales(
-    producto.precio * obtenerPorcentajeIva(producto)
-  );
-};
-
-const calcularPrecioProductoConIva = (producto: Producto): number => {
-  return producto.precio + calcularIvaProducto(producto);
-};
-
-const calcularLineaTicket = (linea: LineaTicket): ResultadoLineaTicket => {
-  const precioSinIva = linea.producto.precio * linea.cantidad;
-  const precioConIva: number =
-    calcularPrecioProductoConIva(linea.producto) * linea.cantidad;
-
-  return {
-    nombre: linea.producto.nombre,
-    cantidad: linea.cantidad,
-    precioSinIva,
-    tipoIva: linea.producto.tipoIva,
-    precioConIva,
-  };
-};
-
-const calcularTotalLineasTicket = (
-  lineasTicket: LineaTicket[]
-): ResultadoLineaTicket[] => {
-  const lineasResultado: ResultadoLineaTicket[] =
-    lineasTicket.map(calcularLineaTicket);
-  return lineasResultado;
-};
-
-const calcularTotalSinIvaTicket = (
-  lineasResultado: ResultadoLineaTicket[]
-): number => {
-  return redondearDosDecimales(
-    lineasResultado.reduce((total, linea) => total + linea.precioSinIva, 0)
-  );
-};
-const calcularTotalIvaTicket = (
-  lineasResultado: ResultadoLineaTicket[]
-): number => {
-  return redondearDosDecimales(
-    lineasResultado.reduce(
-      (total, linea) => total + (linea.precioConIva - linea.precioSinIva),
-      0
-    )
-  );
-};
-
-const calcularDesgloseIva = (
-  lineasResultado: ResultadoLineaTicket[]
-): TotalPorTipoIva[] => {
-  const totalPorTipoIva: { [key in TipoIva]: number } = {
-    general: 0,
-    reducido: 0,
-    superreducidoA: 0,
-    superreducidoB: 0,
-    superreducidoC: 0,
-    sinIva: 0,
-  };
-
-  lineasResultado.forEach((linea) => {
-    const tipoIva = linea.tipoIva;
-
-    const ivaPagado = redondearDosDecimales(
-      linea.precioConIva - linea.precioSinIva
-    );
-
-    totalPorTipoIva[tipoIva] += ivaPagado;
-  });
-
-  const desglose: TotalPorTipoIva[] = [];
-
-  for (const tipoIva in totalPorTipoIva) {
-    desglose.push({
-      tipoIva: tipoIva as TipoIva,
-      cuantia: totalPorTipoIva[tipoIva as TipoIva],
-    });
-  }
-
-  return desglose;
-};
-
-const calculaTicket = (lineasTicket: LineaTicket[]): TicketFinal => {
-  const lineasResultado = calcularTotalLineasTicket(lineasTicket);
-
-  const totalSinIva: number = calcularTotalSinIvaTicket(lineasResultado);
-
-  const totalIva: number = calcularTotalIvaTicket(lineasResultado);
-
-  const totalConIva: number = totalSinIva + totalIva;
-
-  const desgloseIva: TotalPorTipoIva[] = calcularDesgloseIva(lineasResultado);
-
-  const ticket: TicketFinal = {
-    lineas: lineasResultado,
-    total: {
-      totalSinIva,
-      totalConIva,
-      totalIva,
-    },
-    desgloseIva,
-  };
-
-  return ticket;
-};
-
-const productos: LineaTicket[] = [
-  {
-    producto: {
-      nombre: "Legumbres",
-      precio: 2,
-      tipoIva: "general",
-    },
-    cantidad: 2,
-  },
-  {
-    producto: {
-      nombre: "Perfume",
-      precio: 20,
-      tipoIva: "general",
-    },
-    cantidad: 3,
-  },
-  {
-    producto: {
-      nombre: "Leche",
-      precio: 1,
-      tipoIva: "superreducidoC",
-    },
-    cantidad: 6,
-  },
-  {
-    producto: {
-      nombre: "Lasaña",
-      precio: 5,
-      tipoIva: "superreducidoA",
-    },
-    cantidad: 1,
-  },
-  {
-    producto: {
-      nombre: "Almendras",
-      precio: 1.5,
-      tipoIva: "general",
-    },
-    cantidad: 2,
-  },
+const commonPasswords: string[] = [
+  "password",
+  "123456",
+  "qwerty",
+  "admin",
+  "letmein",
+  "welcome",
+  "monkey",
+  "sunshine",
+  "password1",
+  "123456789",
+  "football",
+  "iloveyou",
+  "1234567",
+  "123123",
+  "12345678",
+  "abc123",
+  "qwerty123",
+  "1q2w3e4r",
+  "baseball",
+  "password123",
+  "superman",
+  "987654321",
+  "mypass",
+  "trustno1",
+  "hello123",
+  "dragon",
+  "1234",
+  "555555",
+  "loveme",
+  "hello",
+  "hockey",
+  "letmein123",
+  "welcome123",
+  "mustang",
+  "shadow",
+  "12345",
+  "passw0rd",
+  "abcdef",
+  "123abc",
+  "football123",
+  "master",
+  "jordan23",
+  "access",
+  "flower",
+  "qwertyuiop",
+  "admin123",
+  "iloveyou123",
+  "welcome1",
+  "monkey123",
+  "sunshine1",
+  "password12",
+  "1234567890",
 ];
 
-const ticket = calculaTicket(productos);
-console.log(ticket);
+interface ValidacionClave {
+  esValida: boolean;
+  error?: string;
+}
+
+const tieneMayusculasYMinusculas = (clave: string): ValidacionClave => {
+  if (/[a-z]/.test(clave) && /[A-Z]/.test(clave)) {
+    return { esValida: true };
+  }
+  return {
+    esValida: false,
+    error: "La clave debe de tener mayúsculas y minúsculas",
+  };
+};
+
+const tieneNumeros = (clave: string): ValidacionClave => {
+  if (/\d/.test(clave)) {
+    return { esValida: true };
+  }
+  return { esValida: false, error: "La clave debe de tener números" };
+};
+
+const tieneCaracteresEspeciales = (clave: string): ValidacionClave => {
+  if (/[!@#$%^&*(),.?":{}|<>]/.test(clave)) {
+    return { esValida: true };
+  }
+  return {
+    esValida: false,
+    error: "La clave debe de tener caracteres especiales",
+  };
+};
+
+const tieneLongitudMinima = (clave: string): ValidacionClave => {
+  if (clave.length >= 8) {
+    return { esValida: true };
+  }
+  return {
+    esValida: false,
+    error: "La clave debe de tener una longitud mínima de 8 caracteres",
+  };
+};
+
+const tieneNombreUsuario = (
+  nombreUsuario: string,
+  clave: string
+): ValidacionClave => {
+  if (!clave.toLowerCase().includes(nombreUsuario.toLowerCase())) {
+    return { esValida: true };
+  }
+  return {
+    esValida: false,
+    error: "La clave no debe tener el nombre del usuario",
+  };
+};
+
+const tienePalabrasComunes = (
+  clave: string,
+  commonPasswords: string[]
+): ValidacionClave => {
+  for (const common of commonPasswords) {
+    if (clave.includes(common)) {
+      return {
+        esValida: false,
+        error: "La clave no debe de contener palabras comunes",
+      };
+    }
+  }
+  return { esValida: true };
+};
+
+const validarClave = (
+  nombreUsuario: string,
+  clave: string,
+  commonPasswords: string[]
+): ValidacionClave => {
+  const validaciones: ValidacionClave[] = [
+    tieneMayusculasYMinusculas(clave),
+    tieneNumeros(clave),
+    tieneCaracteresEspeciales(clave),
+    tieneLongitudMinima(clave),
+    tieneNombreUsuario(nombreUsuario, clave),
+    tienePalabrasComunes(clave, commonPasswords),
+  ];
+
+  for (const validacion of validaciones) {
+    if (!validacion.esValida) {
+      return validacion;
+    }
+  }
+
+  return { esValida: true };
+};
+
+console.log(validarClave("javilaveda", "Javi@laveda8", commonPasswords));
